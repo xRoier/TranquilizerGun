@@ -23,7 +23,7 @@ namespace TranquilizerGun {
         public int gunCd = 10;
         public ItemType tgun;
         public Dictionary<ReferenceHub, int> scpShots;
-        public List<ReferenceHub> tranquilized, gm, protection;
+        public List<ReferenceHub> tranquilized, protection, pepega;
         public readonly EXILED.ApiObjects.AmmoType _9mm = EXILED.ApiObjects.AmmoType.Dropped9;
 
         public EventHandlers( Plugin plugin ) {
@@ -42,12 +42,10 @@ namespace TranquilizerGun {
             if(scpShots.ContainsKey(e.Player)) scpShots.Remove(e.Player);
             if(protection.Contains(e.Player)) protection.Remove(e.Player);
             if(tranquilized.Contains(e.Player)) tranquilized.Remove(e.Player);
-            if(gm.Contains(e.Player)) gm.Remove(e.Player);
         }
 
         public void OnRoundStart() {
             tranquilized = new List<ReferenceHub>();
-            gm = new List<ReferenceHub>();
             protection = new List<ReferenceHub>();
             scpShots = new Dictionary<ReferenceHub, int>();
 
@@ -84,6 +82,7 @@ namespace TranquilizerGun {
                                 ev.Sender.RAMessage(plugin.accessDenied);
                                 return;
                             }
+                            enabled = !enabled;
                             Plugin.Config.SetString("tgun_enable", enabled.ToString());
                             plugin.UpdateEvents();
                             ev.Sender.RAMessage($"<color=green>Tranquilizers are now: {enabled}.</color>");
@@ -104,9 +103,30 @@ namespace TranquilizerGun {
                             plugin.ReloadConfig();
                             ev.Sender.RAMessage($"<color=green>Configuration variables have been reloaded.</color>");
                             return;
-                        }
+                        } else if(args[1] == "sleep") {
+                            if(!CheckPermission(sender, "sleep")) {
+                                ev.Sender.RAMessage(plugin.accessDenied);
+                                return;
+                            } 
+
+                            if(args.Length <= 2) {
+                                ev.Sender.RAMessage($"<color=red>Please try: \"tgun <sleep> <player>\".</color>");
+                                return;
+                            }
+
+                            ReferenceHub player;
+
+                            try {
+                                player = Player.GetPlayer(args[2]);
+                            } catch(Exception) {
+                                ev.Sender.RAMessage($"<color=red>Couldn't find player: {args[2]}.</color>");
+                                return;
+                            }
+                            GoSleepySleepy(player);
+                            return;
+                        } else
+                            ev.Sender.RAMessage($"<color=red>Try using: \"tgun <reload/protect/replaceguns/toggle/sleep>\"</color>");
                     }
-                    ev.Sender.RAMessage($"<color=red>Try using: \"tgun <reload/protect/replaceguns/toggle>\"</color>");
                 }
             } catch(Exception e) {
                 Log.Error("" + e.StackTrace);
@@ -114,10 +134,8 @@ namespace TranquilizerGun {
             return;
         }
 
-
-
-        public void WarheadGoBoomEvent() {
-
+        public void OnBoomerEvent(ref GrenadeThrownEvent ev) {
+            if(tranquilized.Contains(ev.Player)) ev.Allow = false;
         }
 
         public void OnPickupEvent( ref PickupItemEvent ev ) {
@@ -159,8 +177,12 @@ namespace TranquilizerGun {
         }
 
         public void OnPlayerHurt( ref PlayerHurtEvent ev ) {
+            if(tranquilized.Contains(ev.Player))
+                if(ev.DamageType == DamageTypes.Decont) ev.Amount = 0;
+
             if(!IsThisFrustrating(DamageTypes.FromIndex(ev.Info.Tool))) return;
             if(ThisIsMoreFrustrating(DamageTypes.FromIndex(ev.Info.Tool)) == tgun && !protection.Contains(ev.Player)) {
+                ev.Amount = plugin.tranqDamage;
                 if(ev.Player.characterClassManager.CurClass == RoleType.Scp173 && plugin.blacklist173) return;
                 if(ev.Player.GetTeam() == Team.SCP) {
                     if(!scpShots.ContainsKey(ev.Player)) scpShots.Add(ev.Player, 0);
@@ -175,27 +197,17 @@ namespace TranquilizerGun {
             }
         }
 
-        //public void OnPlayerDropEvent( ref DropItemEvent ev ) {
-        //    if(!enabled) return;
-        //    if(tranquilized.Contains(ev.Player)) {
-        //        ev.Allow = false;
-        //        return;
-        //    } else ev.Allow = true;
-        //}
-
         private void GoSleepySleepy( ReferenceHub player ) {
             int IdkHowToCode = (int) player.characterClassManager.CurClass;
             if(player.characterClassManager.CurClass == RoleType.Tutorial) IdkHowToCode = 15;
             // Tutorial = 15 
-            if(player.playerStats.health > plugin.tranqDamage) player.playerStats.health -= plugin.tranqDamage;
             if(plugin.warningTime != 0) player.Broadcast(plugin.warningTime, plugin.warningText);
             tranquilized.Add(player);
             player.gameObject.GetComponent<RagdollManager>().SpawnRagdoll(player.gameObject.transform.position, Quaternion.identity, IdkHowToCode,
                 new PlayerStats.HitInfo(1000f, player.characterClassManager.UserId, DamageTypes.Usp, player.queryProcessor.PlayerId), false,
                 player.GetNickname(), player.GetNickname(), 0);
             Vector3 UglyCopy = player.plyMovementSync.RealModelPosition;
-            if(player.characterClassManager.GodMode) gm.Add(player);
-            else player.characterClassManager.GodMode = true;
+            tranquilized.Add(player);
             EventPlugin.GhostedIds.Add(player.queryProcessor.PlayerId);
             if(!plugin.doStun) player.plyMovementSync.OverridePosition(new Vector3(2, -2, 3), 0f, false);
             //else {
@@ -242,13 +254,11 @@ namespace TranquilizerGun {
 
         public IEnumerator<float> WakeTheFuckUpSamurai( ReferenceHub player, Vector3 pos, float time ) {
             yield return Timing.WaitForSeconds(time);
+            tranquilized.Remove(player);
+            player.plyMovementSync.OverridePosition(pos, 0f, false);
+            EventPlugin.GhostedIds.Remove(player.queryProcessor.PlayerId);
             foreach(Ragdoll doll in Object.FindObjectsOfType<Ragdoll>()) {
                 if(doll.owner.ownerHLAPI_id == player.GetNickname()) {
-                    tranquilized.Remove(player);
-                    player.plyMovementSync.OverridePosition(pos, 0f, false);
-                    if(!gm.Contains(player))
-                        player.characterClassManager.GodMode = false;
-                    EventPlugin.GhostedIds.Remove(player.queryProcessor.PlayerId);
                     NetworkServer.Destroy(doll.gameObject);
                 }
             }

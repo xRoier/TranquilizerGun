@@ -37,6 +37,7 @@ namespace TranquilizerGun {
                 handlers = new EventHandlers(this);
 
                 UpdateEvents();
+                Events.RemoteAdminCommandEvent += handlers.OnCommand;
 
                 Log.Info("Plugin loaded correctly!");
             } catch ( Exception e ) {
@@ -46,6 +47,7 @@ namespace TranquilizerGun {
 
         public override void OnDisable() {
             UpdateEvents();
+            Events.RemoteAdminCommandEvent -= handlers.OnCommand;
 
             handlers = null;
         }
@@ -54,20 +56,18 @@ namespace TranquilizerGun {
         }
 
         public void UpdateEvents() {
-            if(!Plugin.Config.GetBool("tgun_enable", true)) {
-                Events.WarheadDetonationEvent += handlers.WarheadGoBoomEvent;
+            if(Plugin.Config.GetBool("tgun_enable", true)) {
                 Events.ShootEvent += handlers.OnShootEvent;
+                Events.GrenadeThrownEvent += handlers.OnBoomerEvent;
                 Events.PickupItemEvent += handlers.OnPickupEvent;
                 Events.ItemChangedEvent += handlers.OnItemChangedEvent;
-                Events.RemoteAdminCommandEvent += handlers.OnCommand;
                 Events.RoundStartEvent += handlers.OnRoundStart;
                 Events.PlayerHurtEvent += handlers.OnPlayerHurt;
             } else if(!Plugin.Config.GetBool("tgun_enable", true)) {
-                Events.WarheadDetonationEvent -= handlers.WarheadGoBoomEvent;
                 Events.ShootEvent -= handlers.OnShootEvent;
+                Events.GrenadeThrownEvent -= handlers.OnBoomerEvent;
                 Events.PickupItemEvent -= handlers.OnPickupEvent;
                 Events.ItemChangedEvent -= handlers.OnItemChangedEvent;
-                Events.RemoteAdminCommandEvent -= handlers.OnCommand;
                 Events.RoundStartEvent -= handlers.OnRoundStart;
                 Events.PlayerHurtEvent -= handlers.OnPlayerHurt;
             }
