@@ -104,28 +104,28 @@ namespace TranquilizerGun {
                             ev.Sender.RAMessage($"<color=green>Configuration variables have been reloaded.</color>");
                             return;
                         } else if(args[1] == "sleep") {
-                            if(!CheckPermission(sender, "sleep")) {
-                                ev.Sender.RAMessage(plugin.accessDenied);
-                                return;
-                            } 
+                            //if(!CheckPermission(sender, "sleep")) {
+                            //    ev.Sender.RAMessage(plugin.accessDenied);
+                            //    return;
+                            //} 
 
-                            if(args.Length <= 2) {
-                                ev.Sender.RAMessage($"<color=red>Please try: \"tgun <sleep> <player>\".</color>");
-                                return;
-                            }
+                            //if(args.Length <= 2) {
+                            //    ev.Sender.RAMessage($"<color=red>Please try: \"tgun <sleep> <player>\".</color>");
+                            //    return;
+                            //}
 
-                            ReferenceHub player;
+                            //ReferenceHub player;
 
-                            try {
-                                player = Player.GetPlayer(args[2]);
-                            } catch(Exception) {
-                                ev.Sender.RAMessage($"<color=red>Couldn't find player: {args[2]}.</color>");
-                                return;
-                            }
-                            GoSleepySleepy(player);
-                            return;
+                            //try {
+                            //    player = Player.GetPlayer(args[2]);
+                            //} catch(Exception) {
+                            //    ev.Sender.RAMessage($"<color=red>Couldn't find player: {args[2]}.</color>");
+                            //    return;
+                            //}
+                            //GoSleepySleepy(player);
+                            //return;
                         } else
-                            ev.Sender.RAMessage($"<color=red>Try using: \"tgun <reload/protect/replaceguns/toggle/sleep>\"</color>");
+                            ev.Sender.RAMessage($"<color=red>Try using: \"tgun <reload/protect/replaceguns/toggle>\"</color>");
                     }
                 }
             } catch(Exception e) {
