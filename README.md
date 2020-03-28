@@ -18,6 +18,7 @@ Arguments inside &lt;&gt; are required. [] means it's optional.
 - Reload: Reloads every configuration variable.
 - ReplaceGuns: Forces the replace of all COM15 with "tgun_weapon" (Config variable).
 - Protect: Protection against "T-Guns". (Good for administrators!)
+- Sleep: Force the sleeping method on someone (Or everyone...)
 
 ### Configuration
 These are the variables that should be added to your 7777-config.yml. Or simply download/copy&paste the [config-file example](https://github.com/ImUrX/TranquilizerGun/blob/master/Examples/7777-config.yml)
@@ -47,8 +48,9 @@ These are the permissions that should be added to your permissions.yml inside yo
 | Permission  | Action |
 | ------------- | ------------- |
 | tgun.tg | `Tranquilizer Gun's main command` | 
-| tgun.protect | `Let's you toggle your protection against people using tranq. guns!` | 
 | tgun.toggle | `Let's you toggle the whole game functionalities!` | 
+| tgun.protect | `Let's you toggle your protection against people using tranq. guns!` | 
+| tgun.sleep | `Applies the "Sleep" method on one or all players` | 
 | tgun.replaceguns | `Forces a replacement of all COM15 pistols to whatever you set "tgun_weapon" to` | 
 | tgun.reload | `Reloads every config variable available!` | 
 | tgun.use | `If "tgun_usespermission" is set to true, this will let you use your Tranquilizer Gun` | 
