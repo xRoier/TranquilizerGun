@@ -36,7 +36,7 @@ namespace TranquilizerGun {
                 Log.Debug("Initializing EventHandlers...");
                 handlers = new EventHandlers(this);
 
-                UpdateEvents();
+                StartEvents();
                 Events.RemoteAdminCommandEvent += handlers.OnCommand;
 
                 Log.Info("Plugin loaded correctly!");
@@ -46,7 +46,7 @@ namespace TranquilizerGun {
         }
 
         public override void OnDisable() {
-            UpdateEvents();
+            StopEvents();
             Events.RemoteAdminCommandEvent -= handlers.OnCommand;
 
             handlers = null;
@@ -55,22 +55,20 @@ namespace TranquilizerGun {
         public override void OnReload() {
         }
 
-        public void UpdateEvents() {
-            if(Plugin.Config.GetBool("tgun_enable", true)) {
-                Events.ShootEvent += handlers.OnShootEvent;
-                Events.GrenadeThrownEvent += handlers.OnBoomerEvent;
-                Events.PickupItemEvent += handlers.OnPickupEvent;
-                Events.ItemChangedEvent += handlers.OnItemChangedEvent;
-                Events.RoundStartEvent += handlers.OnRoundStart;
-                Events.PlayerHurtEvent += handlers.OnPlayerHurt;
-            } else if(!Plugin.Config.GetBool("tgun_enable", true)) {
-                Events.ShootEvent -= handlers.OnShootEvent;
-                Events.GrenadeThrownEvent -= handlers.OnBoomerEvent;
-                Events.PickupItemEvent -= handlers.OnPickupEvent;
-                Events.ItemChangedEvent -= handlers.OnItemChangedEvent;
-                Events.RoundStartEvent -= handlers.OnRoundStart;
-                Events.PlayerHurtEvent -= handlers.OnPlayerHurt;
-            }
+        public void StartEvents() {
+            Events.ShootEvent += handlers.OnShootEvent;
+            Events.GrenadeThrownEvent += handlers.OnBoomerEvent;
+            Events.PickupItemEvent += handlers.OnPickupEvent;
+            Events.RoundStartEvent += handlers.OnRoundStart;
+            Events.PlayerHurtEvent += handlers.OnPlayerHurt;
+        }
+
+        public void StopEvents() {
+            Events.ShootEvent -= handlers.OnShootEvent;
+            Events.GrenadeThrownEvent -= handlers.OnBoomerEvent;
+            Events.PickupItemEvent -= handlers.OnPickupEvent;
+            Events.RoundStartEvent -= handlers.OnRoundStart;
+            Events.PlayerHurtEvent -= handlers.OnPlayerHurt;
         }
 
         public void ReloadConfig() {

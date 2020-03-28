@@ -18,8 +18,8 @@ namespace TranquilizerGun {
     public class EventHandlers {
 
         public Plugin plugin;
-        public bool enabled;
         public bool testEnabled = false;
+        public bool enabled;
         public int gunCd = 10;
         public ItemType tgun;
         public Dictionary<ReferenceHub, int> scpShots;
@@ -28,7 +28,7 @@ namespace TranquilizerGun {
 
         public EventHandlers( Plugin plugin ) {
             this.plugin = plugin;
-            this.enabled = Plugin.Config.GetBool("tgun_enable", true);
+            enabled = Plugin.Config.GetBool("tgun_enable", true);
             try {
                 Enum.TryParse(plugin.weapon, out tgun);
             } catch(Exception) {
@@ -63,7 +63,7 @@ namespace TranquilizerGun {
                         ev.Sender.RAMessage(plugin.accessDenied);
                         return;
                     }
-                    if(args.Length == 2) {
+                    if(args.Length >= 2) {
                         if(args[1] == "protect") {
                             if(!CheckPermission(sender, "protect")) {
                                 ev.Sender.RAMessage(plugin.accessDenied);
@@ -84,8 +84,9 @@ namespace TranquilizerGun {
                             }
                             enabled = !enabled;
                             Plugin.Config.SetString("tgun_enable", enabled.ToString());
-                            plugin.UpdateEvents();
                             ev.Sender.RAMessage($"<color=green>Tranquilizers are now: {enabled}.</color>");
+                            if(enabled) plugin.StartEvents();
+                            else if(!enabled) plugin.StopEvents();
                             return;
                         } else if(args[1] == "replaceguns") {
                             if(!CheckPermission(sender, "replaceguns")) {
@@ -104,29 +105,42 @@ namespace TranquilizerGun {
                             ev.Sender.RAMessage($"<color=green>Configuration variables have been reloaded.</color>");
                             return;
                         } else if(args[1] == "sleep") {
-                            //if(!CheckPermission(sender, "sleep")) {
-                            //    ev.Sender.RAMessage(plugin.accessDenied);
-                            //    return;
-                            //} 
+                            if(!CheckPermission(sender, "sleep")) {
+                                ev.Sender.RAMessage(plugin.accessDenied);
+                                return;
+                            } 
 
-                            //if(args.Length <= 2) {
-                            //    ev.Sender.RAMessage($"<color=red>Please try: \"tgun <sleep> <player>\".</color>");
-                            //    return;
-                            //}
+                            if(args.Length == 2) {
+                                ev.Sender.RAMessage($"<color=red>Please try: \"tgun <sleep> <player>.</color>");
+                                return;
+                            }
 
-                            //ReferenceHub player;
+                            if(args[2] == "all" || args[2] == "*") {
+                                int i = 0;
+                                foreach(ReferenceHub player in Player.GetHubs()) {
+                                    if(player.characterClassManager.CurClass != RoleType.Spectator || player.characterClassManager.CurClass != RoleType.None) {
+                                        i++;
+                                        GoSleepySleepy(player);
+                                    }
+                                }
+                                ev.Sender.RAMessage($"<color=green>Made {i} players fall asleep.</color>");
+                            } else {
+                                ReferenceHub player;
 
-                            //try {
-                            //    player = Player.GetPlayer(args[2]);
-                            //} catch(Exception) {
-                            //    ev.Sender.RAMessage($"<color=red>Couldn't find player: {args[2]}.</color>");
-                            //    return;
-                            //}
-                            //GoSleepySleepy(player);
-                            //return;
-                        } else
-                            ev.Sender.RAMessage($"<color=red>Try using: \"tgun <reload/protect/replaceguns/toggle>\"</color>");
+                                try {
+                                    player = Player.GetPlayer(args[2]);
+                                } catch(Exception) {
+                                    ev.Sender.RAMessage($"<color=red>Couldn't find player: {args[2]}.</color>");
+                                    return;
+                                }
+
+                                ev.Sender.RAMessage($"<color=green>Putting {player.GetNickname()} to sleep.</color>");
+                                GoSleepySleepy(player);
+                            }    
+                            return;
+                        }
                     }
+                    ev.Sender.RAMessage($"<color=red>Try using: \"tgun <reload/protect/replaceguns/toggle/sleep>\"</color>");
                 }
             } catch(Exception e) {
                 Log.Error("" + e.StackTrace);
@@ -143,19 +157,9 @@ namespace TranquilizerGun {
                 ev.Allow = false;
                 return;
             }
-            if(ev.Item.ItemId == tgun) {
-                ev.Allow = true;
-                if(plugin.youPickedupDuration != 0)
-                    ev.Player.Broadcast(plugin.youPickedupDuration, plugin.youPickedupText);
-            }
-        }
 
-        public void OnItemChangedEvent( ItemChangedEvent ev ) {
-            if(tranquilized.Contains(ev.Player)) {
-                Inventory.SyncItemInfo item = new Inventory.SyncItemInfo {
-                    id = ItemType.None
-                };
-                ev.NewItem = item;
+            if(ev.Item.ItemId == tgun && plugin.youPickedupDuration != 0) {
+                    ev.Player.Broadcast(plugin.youPickedupDuration, plugin.youPickedupText);
             }
         }
 
@@ -177,13 +181,13 @@ namespace TranquilizerGun {
         }
 
         public void OnPlayerHurt( ref PlayerHurtEvent ev ) {
-            if(tranquilized.Contains(ev.Player))
-                if(ev.DamageType == DamageTypes.Decont) ev.Amount = 0;
+            if(tranquilized.Contains(ev.Player) && ev.DamageType == DamageTypes.Decont) { 
+                ev.Amount = 0;
+                return;
+            }
 
-            if(!IsThisFrustrating(DamageTypes.FromIndex(ev.Info.Tool))) return;
-            if(ThisIsMoreFrustrating(DamageTypes.FromIndex(ev.Info.Tool)) == tgun && !protection.Contains(ev.Player)) {
-                ev.Amount = plugin.tranqDamage;
-                if(ev.Player.characterClassManager.CurClass == RoleType.Scp173 && plugin.blacklist173) return;
+            if(IsThisFrustrating(DamageTypes.FromIndex(ev.Info.Tool)) && ThisIsMoreFrustrating(DamageTypes.FromIndex(ev.Info.Tool)) == tgun && !protection.Contains(ev.Player)) {
+                if(ev.Player.characterClassManager.CurClass == RoleType.Scp173 && plugin.blacklist173) return; 
                 if(ev.Player.GetTeam() == Team.SCP) {
                     if(!scpShots.ContainsKey(ev.Player)) scpShots.Add(ev.Player, 0);
                     scpShots[ev.Player] += 1;
@@ -193,6 +197,7 @@ namespace TranquilizerGun {
                     }
                     return;
                 }
+                ev.Amount = plugin.tranqDamage;
                 GoSleepySleepy(ev.Player);
             }
         }
@@ -201,8 +206,8 @@ namespace TranquilizerGun {
             int IdkHowToCode = (int) player.characterClassManager.CurClass;
             if(player.characterClassManager.CurClass == RoleType.Tutorial) IdkHowToCode = 15;
             // Tutorial = 15 
+            if(player.playerStats.health > plugin.tranqDamage) player.playerStats.health -= plugin.tranqDamage;
             if(plugin.warningTime != 0) player.Broadcast(plugin.warningTime, plugin.warningText);
-            tranquilized.Add(player);
             player.gameObject.GetComponent<RagdollManager>().SpawnRagdoll(player.gameObject.transform.position, Quaternion.identity, IdkHowToCode,
                 new PlayerStats.HitInfo(1000f, player.characterClassManager.UserId, DamageTypes.Usp, player.queryProcessor.PlayerId), false,
                 player.GetNickname(), player.GetNickname(), 0);
@@ -254,8 +259,8 @@ namespace TranquilizerGun {
 
         public IEnumerator<float> WakeTheFuckUpSamurai( ReferenceHub player, Vector3 pos, float time ) {
             yield return Timing.WaitForSeconds(time);
-            tranquilized.Remove(player);
             player.plyMovementSync.OverridePosition(pos, 0f, false);
+            tranquilized.Remove(player);
             EventPlugin.GhostedIds.Remove(player.queryProcessor.PlayerId);
             foreach(Ragdoll doll in Object.FindObjectsOfType<Ragdoll>()) {
                 if(doll.owner.ownerHLAPI_id == player.GetNickname()) {
