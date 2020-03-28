@@ -33,6 +33,7 @@ These are the variables that should be added to your 7777-config.yml. Or simply 
 | tgun_sleepduration_min | Minimum duration time someone can fall asleep for | `3.0` |
 | tgun_sleepduration_max | Minimum duration time someone can fall asleep for | `5.0` |
 | tgun_usespermission | Do tranquilizer guns require permissions? | `false` |
+| tgun_scp_shotsneeded | How many shots does a SCP need to take before being tranquilized | `2` |
 | tgun_blacklist_173 | Setting this to true makes it so SCP-173 can't be put to sleep (Personally not recommended) | `true` |
 | tgun_replacecomgun | After the round starts, all pistols are replaced with "tgun_weapon" | `true` |
 | tgun_accessdenied | Message displayed when access to command is denied | `<color=red>Access denied.</color>` |
