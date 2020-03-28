@@ -7,6 +7,8 @@ namespace TranquilizerGun {
         public EventHandlers handlers;
 
         #region Config Variables
+        public bool enabled;
+
         public string accessDenied;
         public string warningText;
         public uint warningTime;
@@ -36,9 +38,11 @@ namespace TranquilizerGun {
                 Log.Debug("Initializing EventHandlers...");
                 handlers = new EventHandlers(this);
 
-                StartEvents();
                 Events.RemoteAdminCommandEvent += handlers.OnCommand;
+                enabled = Plugin.Config.GetBool("tgun_enable", true);
 
+                if(enabled)
+                StartEvents();
                 Log.Info("Plugin loaded correctly!");
             } catch ( Exception e ) {
                 Log.Error("Problem loading plugin: " + e.StackTrace);
@@ -46,6 +50,7 @@ namespace TranquilizerGun {
         }
 
         public override void OnDisable() {
+            if(!enabled)
             StopEvents();
             Events.RemoteAdminCommandEvent -= handlers.OnCommand;
 
@@ -79,6 +84,7 @@ namespace TranquilizerGun {
             // Text
 
             weapon = Config.GetString("tgun_weapon", "GunUSP");
+            ScpShotsNeeded = Config.GetInt("tgun_scp_shotsneeded", 2);
             tranqAmmo = Config.GetInt("tgun_ammo", 18) - 1;
             tranqDamage = Config.GetInt("tgun_damage", 1);
             sleepDurationMin = Config.GetFloat("tgun_sleepduration_min", 3f);

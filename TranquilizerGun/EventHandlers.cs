@@ -19,7 +19,6 @@ namespace TranquilizerGun {
 
         public Plugin plugin;
         public bool testEnabled = false;
-        public bool enabled;
         public int gunCd = 10;
         public ItemType tgun;
         public Dictionary<ReferenceHub, int> scpShots;
@@ -28,7 +27,9 @@ namespace TranquilizerGun {
 
         public EventHandlers( Plugin plugin ) {
             this.plugin = plugin;
-            enabled = Plugin.Config.GetBool("tgun_enable", true);
+            tranquilized = new List<ReferenceHub>();
+            protection = new List<ReferenceHub>();
+            scpShots = new Dictionary<ReferenceHub, int>();
             try {
                 Enum.TryParse(plugin.weapon, out tgun);
             } catch(Exception) {
@@ -45,9 +46,6 @@ namespace TranquilizerGun {
         }
 
         public void OnRoundStart() {
-            tranquilized = new List<ReferenceHub>();
-            protection = new List<ReferenceHub>();
-            scpShots = new Dictionary<ReferenceHub, int>();
 
             if(plugin.replaceComGun) Timing.RunCoroutine(DelayedReplace());
         }
@@ -82,11 +80,11 @@ namespace TranquilizerGun {
                                 ev.Sender.RAMessage(plugin.accessDenied);
                                 return;
                             }
-                            enabled = !enabled;
-                            Plugin.Config.SetString("tgun_enable", enabled.ToString());
-                            ev.Sender.RAMessage($"<color=green>Tranquilizers are now: {enabled}.</color>");
-                            if(enabled) plugin.StartEvents();
-                            else if(!enabled) plugin.StopEvents();
+                            plugin.enabled = !plugin.enabled;
+                            Plugin.Config.SetString("tgun_enable", plugin.enabled.ToString());
+                            ev.Sender.RAMessage($"<color=green>Tranquilizers are now: {plugin.enabled}.</color>");
+                            if(plugin.enabled) plugin.StartEvents();
+                            else if(!plugin.enabled) plugin.StopEvents();
                             return;
                         } else if(args[1] == "replaceguns") {
                             if(!CheckPermission(sender, "replaceguns")) {
@@ -211,10 +209,10 @@ namespace TranquilizerGun {
             player.gameObject.GetComponent<RagdollManager>().SpawnRagdoll(player.gameObject.transform.position, Quaternion.identity, IdkHowToCode,
                 new PlayerStats.HitInfo(1000f, player.characterClassManager.UserId, DamageTypes.Usp, player.queryProcessor.PlayerId), false,
                 player.GetNickname(), player.GetNickname(), 0);
-            Vector3 UglyCopy = player.plyMovementSync.RealModelPosition;
+            Vector3 UglyCopy = player.GetPosition();
             tranquilized.Add(player);
             EventPlugin.GhostedIds.Add(player.queryProcessor.PlayerId);
-            if(!plugin.doStun) player.plyMovementSync.OverridePosition(new Vector3(2, -2, 3), 0f, false);
+            if(!plugin.doStun) player.SetPosition(2, -2, 3);
             //else {
             // 10.0 update stun
             //}
