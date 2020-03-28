@@ -1,5 +1,9 @@
 tgun_enable: True
 tgun_weapon: GunUSP
+
+tgun_blacklist_173: true
+tgun_scp_shotsneeded: 2
+
 tgun_ammo: 18
 tgun_damage: 1
 tgun_sleepduration_min: 3.0
