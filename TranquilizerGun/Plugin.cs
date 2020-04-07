@@ -23,7 +23,7 @@ namespace TranquilizerGun {
         public float sleepDurationMax;
         public int tranqAmmo;
         public int tranqDamage;
-        
+
         public int ScpShotsNeeded;
         public bool replaceComGun;
         public bool requiresPermission;
@@ -42,16 +42,16 @@ namespace TranquilizerGun {
                 enabled = Plugin.Config.GetBool("tgun_enable", true);
 
                 if(enabled)
-                StartEvents();
+                    StartEvents();
                 Log.Info("Plugin loaded correctly!");
-            } catch ( Exception e ) {
+            } catch(Exception e) {
                 Log.Error("Problem loading plugin: " + e.StackTrace);
             }
         }
 
         public override void OnDisable() {
             if(!enabled)
-            StopEvents();
+                StopEvents();
             Events.RemoteAdminCommandEvent -= handlers.OnCommand;
 
             handlers = null;
@@ -62,7 +62,6 @@ namespace TranquilizerGun {
 
         public void StartEvents() {
             Events.ShootEvent += handlers.OnShootEvent;
-            Events.GrenadeThrownEvent += handlers.OnBoomerEvent;
             Events.PickupItemEvent += handlers.OnPickupEvent;
             Events.RoundStartEvent += handlers.OnRoundStart;
             Events.PlayerHurtEvent += handlers.OnPlayerHurt;
@@ -70,7 +69,6 @@ namespace TranquilizerGun {
 
         public void StopEvents() {
             Events.ShootEvent -= handlers.OnShootEvent;
-            Events.GrenadeThrownEvent -= handlers.OnBoomerEvent;
             Events.PickupItemEvent -= handlers.OnPickupEvent;
             Events.RoundStartEvent -= handlers.OnRoundStart;
             Events.PlayerHurtEvent -= handlers.OnPlayerHurt;
