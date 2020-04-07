@@ -31,7 +31,7 @@ These are the variables that should be added to your 7777-config.yml. Or simply 
 | tgun_ammo | How much ammunition does one shot take? | `18` |
 | tgun_damage | Damage dealt to the player by the Tranquilizer Gun | `1` |
 | tgun_sleepduration_min | Minimum duration time someone can fall asleep for | `3.0` |
-| tgun_sleepduration_max | Minimum duration time someone can fall asleep for | `5.0` |
+| tgun_sleepduration_max | Maximum duration time someone can fall asleep for | `5.0` |
 | tgun_usespermission | Do tranquilizer guns require permissions? | `false` |
 | tgun_scp_shotsneeded | How many shots does a SCP need to take before being tranquilized | `2` |
 | tgun_blacklist_173 | Setting this to true makes it so SCP-173 can't be put to sleep (Personally not recommended) | `true` |
