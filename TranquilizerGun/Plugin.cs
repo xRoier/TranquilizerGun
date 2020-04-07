@@ -50,7 +50,7 @@ namespace TranquilizerGun {
         }
 
         public override void OnDisable() {
-            if(!enabled)
+            if(enabled)
                 StopEvents();
             Events.RemoteAdminCommandEvent -= handlers.OnCommand;
 

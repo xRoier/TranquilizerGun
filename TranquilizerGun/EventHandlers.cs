@@ -178,18 +178,17 @@ namespace TranquilizerGun {
             }
 
             if(IsThisFrustrating(DamageTypes.FromIndex(ev.Info.Tool)) && ThisIsMoreFrustrating(DamageTypes.FromIndex(ev.Info.Tool)) == tgun && !protection.Contains(ev.Player)) {
+                ev.Amount = plugin.tranqDamage;
                 if(ev.Player.characterClassManager.CurClass == RoleType.Scp173 && plugin.blacklist173) return; 
                 if(ev.Player.GetTeam() == Team.SCP) {
                     if(!scpShots.ContainsKey(ev.Player)) scpShots.Add(ev.Player, 0);
                     scpShots[ev.Player] += 1;
                     if(scpShots[ev.Player] >= plugin.ScpShotsNeeded + 1) {
-                        ev.Amount = plugin.tranqDamage;
                         GoSleepySleepy(ev.Player);
                         scpShots[ev.Player] = 0;
                     }
                     return;
                 }
-                ev.Amount = plugin.tranqDamage;
                 GoSleepySleepy(ev.Player);
             }
         }
