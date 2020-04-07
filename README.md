@@ -13,12 +13,13 @@ And... obviously include [EXILED](https://github.com/galaxy119/EXILED "EXILED").
 Arguments inside &lt;&gt; are required. [] means it's optional.
 | Command | Description | Arguments |
 | ------------- | ------------------------------ | -------------------- |
-| `tg`   | Plugin's main command, sends info. | **protect/toggle/reload/replaceguns**|
+| `tg`   | Plugin's main command, sends info. | **protect/toggle/reload/replaceguns/sleep/version**|
 - Toggle: Toggles all of the plugin's functions.
 - Reload: Reloads every configuration variable.
-- ReplaceGuns: Forces the replace of all COM15 with "tgun_weapon" (Config variable).
+- ReplaceGuns: Forces the replace of all COM15 with "tgun_weapon". (Config variable).
 - Protect: Protection against "T-Guns". (Good for administrators!)
-- Sleep: Force the sleeping method on someone (Or everyone...)
+- Sleep: Force the sleeping method on someone. (Or everyone...)
+- Version: Get plugin's current version.
 
 ### Configuration
 These are the variables that should be added to your 7777-config.yml. Or simply download/copy&paste the [config-file example](https://github.com/ImUrX/TranquilizerGun/blob/master/Examples/7777-config.yml)
@@ -54,7 +55,7 @@ These are the permissions that should be added to your permissions.yml inside yo
 | tgun.sleep | `Applies the "Sleep" method on one or all players` | 
 | tgun.replaceguns | `Forces a replacement of all COM15 pistols to whatever you set "tgun_weapon" to` | 
 | tgun.reload | `Reloads every config variable available!` | 
-| tgun.use | `If "tgun_usespermission" is set to true, this will let you use your Tranquilizer Gun` | 
+| tgun.use | `If "tgun_usespermission" is set to true, this will let you use your Tranquilizer Gun` |
 | tgun.* | `All` | 
 
 ### Planned Changes:
@@ -64,4 +65,3 @@ These are the permissions that should be added to your permissions.yml inside yo
 
 ### That'd be all
 Thanks for passing by, have a nice day! :)
-# TranquilizerGun
