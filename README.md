@@ -13,7 +13,7 @@ And... obviously include [EXILED](https://github.com/galaxy119/EXILED "EXILED").
 Arguments inside &lt;&gt; are required. [] means it's optional.
 | Command | Description | Arguments |
 | ------------- | ------------------------------ | -------------------- |
-| `tg`   | Plugin's main command, sends info. | **protect/toggle/reload/replaceguns/sleep/version**|
+| `tg`   | Plugin's main command, sends info. | **protect/toggle/reload/replaceguns/sleep/version/setgun/addgun**|
 - Toggle: Toggles all of the plugin's functions.
 - Reload: Reloads every configuration variable.
 - ReplaceGuns: Forces the replace of all COM15 with "tgun_weapon". (Config variable).
