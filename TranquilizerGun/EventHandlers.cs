@@ -55,7 +55,7 @@ namespace TranquilizerGun {
                 if(ev.Command.Contains("REQUEST_DATA PLAYER_LIST SILENT")) return;
                 string[] args = ev.Command.ToLower().Split(' ');
                 ReferenceHub sender = ev.Sender.SenderId == "SERVER CONSOLE" || ev.Sender.SenderId == "GAME CONSOLE" ? Player.GetPlayer(PlayerManager.localPlayer) : Player.GetPlayer(ev.Sender.SenderId);
-                if(args[0].ToLower() == "tg" || args[0].ToLower() == "tgun" || args[0].ToLower() == "tranquilizergun" || args[0].ToLower() == "tranquilizer") {
+                if(args[0] == "tg" || args[0] == "tgun" || args[0] == "tranquilizergun" || args[0] == "tranquilizer") {
                     ev.Allow = false;
                     if(!CheckPermission(sender, "tg")) {
                         ev.Sender.RAMessage(plugin.accessDenied);
@@ -94,6 +94,28 @@ namespace TranquilizerGun {
                             Timing.RunCoroutine(DelayedReplace());
                             ev.Sender.RAMessage($"<color=green>Replaced all COM15 pistols with {tgun.ToString()}.</color>");
                             return;
+                        } else if(args[1] == "addgun" ) {
+                            if(!CheckPermission(sender, "addgun")) {
+                                ev.Sender.RAMessage(plugin.accessDenied);
+                                return;
+                            }
+                            sender.AddItem(tgun);
+                            ev.Sender.RAMessage($"<color=green>You received a tranquilizing gun!</color>");
+                            return;
+                        } else if(args[1] == "setgun") {
+                            if(!CheckPermission(sender, "setgun")) {
+                                ev.Sender.RAMessage(plugin.accessDenied);
+                                return;
+                            }
+                            ItemType newGun = sender.GetCurrentItem().id;
+                            if(!newGun.IsWeapon()) {
+                                ev.Sender.RAMessage($"<color=red>Can't set Tranquilizer gun to: {sender.GetCurrentItem().id}</color>");
+                                return;
+                            }
+                            Plugin.Config.SetString("tgun_weapon", newGun.ToString());
+                            tgun = newGun;
+                            ev.Sender.RAMessage($"<color=green>Tranquilizer gun has been set to: {newGun.ToString()}.</color>");
+                            return;
                         } else if(args[1] == "reload") {
                             if(!CheckPermission(sender, "reload")) {
                                 ev.Sender.RAMessage(plugin.accessDenied);
@@ -109,7 +131,7 @@ namespace TranquilizerGun {
                             } 
 
                             if(args.Length == 2) {
-                                ev.Sender.RAMessage($"<color=red>Please try: \"tgun <sleep> <player>.</color>");
+                                ev.Sender.RAMessage($"<color=red>Please try: \"{args[0]} <sleep> <player>.</color>");
                                 return;
                             }
 
@@ -140,7 +162,8 @@ namespace TranquilizerGun {
                             return;
                         }
                     }
-                    ev.Sender.RAMessage($"<color=red>Try using: \"tgun <reload/protect/replaceguns/toggle/sleep/version>\"</color>");
+                    ev.Sender.RAMessage($"<color=red>Try using: \"{args[0]} <argument>\"</color>" +
+                        $"\n<color=red>Possible arguments: reload / protect / replaceguns / toggle / sleep / version / setgun / addgun</color>");
                 }
             } catch(Exception e) {
                 Log.Error("" + e.StackTrace);
@@ -154,20 +177,28 @@ namespace TranquilizerGun {
                 return;
             }
 
-            if(ev.Item.ItemId == tgun && plugin.youPickedupDuration != 0) {
-                    ev.Player.Broadcast(plugin.youPickedupDuration, plugin.youPickedupText);
+            if(ev.Item.ItemId == tgun && plugin.youPickedupDuration > 0) {
+                if(plugin.clearBroadcasts) ev.Player.ClearBroadcasts();
+                ev.Player.Broadcast(plugin.youPickedupDuration, plugin.youPickedupText);
             }
         }
 
         public void OnShootEvent( ref ShootEvent ev ) {
-            if((plugin.requiresPermission && !CheckPermission(ev.Shooter, "use"))) return;
+            ReferenceHub hub = ev.Shooter;
+            if((plugin.requiresPermission && !ev.Shooter.CheckPermission("use"))) return;
             if(ev.Shooter.inventory.NetworkcurItem == tgun) {
                 if(ev.Shooter.inventory.GetItemInHand().durability < plugin.tranqAmmo) {
-                    if(plugin.noAmmoDuration != 0)
+                    if(plugin.noAmmoDuration > 0) {
+                        if(plugin.clearBroadcasts) ev.Shooter.ClearBroadcasts();
                         ev.Shooter.Broadcast(plugin.noAmmoDuration, plugin.noAmmoText);
+                    }
+                    int savedAmmo = (int) ev.Shooter.inventory.GetItemInHand().durability;
+                    ev.Shooter.SetWeaponAmmo(0);
+                    Timing.CallDelayed(0.2f, () => { hub.SetWeaponAmmo(savedAmmo); });
+                    ev.Allow = false;
                     return;
                 }
-                ev.Shooter.SetWeaponAmmo(plugin.tranqAmmo);
+                ev.Shooter.RemoveWeaponAmmo(plugin.tranqAmmo);
             }
         }
 
@@ -177,13 +208,13 @@ namespace TranquilizerGun {
                 return;
             }
 
-            if(IsThisFrustrating(DamageTypes.FromIndex(ev.Info.Tool)) && ThisIsMoreFrustrating(DamageTypes.FromIndex(ev.Info.Tool)) == tgun && !protection.Contains(ev.Player)) {
+            if(IsThisFrustrating(ev.DamageType) && ThisIsMoreFrustrating(ev.DamageType) == tgun && !protection.Contains(ev.Player) && ev.Player != ev.Attacker) {
                 ev.Amount = plugin.tranqDamage;
                 if(ev.Player.characterClassManager.CurClass == RoleType.Scp173 && plugin.blacklist173) return; 
-                if(ev.Player.GetTeam() == Team.SCP) {
+                if(ev.Player.GetTeam() == Team.SCP && plugin.ScpShotsNeeded > 1) {
                     if(!scpShots.ContainsKey(ev.Player)) scpShots.Add(ev.Player, 0);
                     scpShots[ev.Player] += 1;
-                    if(scpShots[ev.Player] >= plugin.ScpShotsNeeded + 1) {
+                    if(scpShots[ev.Player] >= plugin.ScpShotsNeeded ) {
                         GoSleepySleepy(ev.Player);
                         scpShots[ev.Player] = 0;
                     }
@@ -200,25 +231,23 @@ namespace TranquilizerGun {
 
             if(player.characterClassManager.CurClass == RoleType.Tutorial) IdkHowToCode = 15;
             // Tutorial = 15 ;
-            if(plugin.warningTime != 0) player.Broadcast(plugin.warningTime, plugin.warningText);
+            if(plugin.warningTime > 0) {
+                if(plugin.clearBroadcasts) player.ClearBroadcasts();
+                player.Broadcast(plugin.warningTime, plugin.warningText);
+            }    
             player.gameObject.GetComponent<RagdollManager>().SpawnRagdoll(player.gameObject.transform.position, Quaternion.identity, IdkHowToCode,
                 new PlayerStats.HitInfo(1000f, player.characterClassManager.UserId, DamageTypes.Usp, player.queryProcessor.PlayerId), false,
                 player.GetNickname(), player.GetNickname(), 0);
             tranquilized.Add(player);
             player.ClearInventory();
             EventPlugin.GhostedIds.Add(player.queryProcessor.PlayerId);
-            if(!plugin.doStun) player.SetPosition(2, -2, 3);
+            //if(!plugin.doStun) player.SetPosition(2, -2, 3);
+            if(!plugin.doStun) player.SetPosition(Vector3.up * 9999f);
             //else {
             // 10.0 update stun
             //}
             Timing.RunCoroutine(WakeTheFuckUpSamurai(player, items, UglyCopy, Extensions.GenerateRandomNumber(plugin.sleepDurationMin, plugin.sleepDurationMax)));
         }
-
-        public bool CheckPermission( ReferenceHub sender, string perm ) {
-            if(!sender.CheckPermission("tgun.*") || !sender.CheckPermission("tgun." + perm)) return false;
-            return true;
-        }
-
         public bool IsThisFrustrating( DamageType type ) {
             return ((type == DamageTypes.Usp && tgun == ItemType.GunUSP) ||
                 (type == DamageTypes.Com15 && tgun == ItemType.GunCOM15) ||
@@ -250,6 +279,11 @@ namespace TranquilizerGun {
             }
         }
 
+        public bool CheckPermission( ReferenceHub sender, string perm ) {
+            if(!sender.CheckPermission("tgun.*") || !sender.CheckPermission("tgun." + perm)) return false;
+            return true;
+        }
+
         public IEnumerator<float> WakeTheFuckUpSamurai( ReferenceHub player, List<Inventory.SyncItemInfo> items, Vector3 pos, float time ) {
             yield return Timing.WaitForSeconds(time);
             player.plyMovementSync.OverridePosition(pos, 0f, false);
@@ -260,6 +294,14 @@ namespace TranquilizerGun {
                 if(doll.owner.ownerHLAPI_id == player.GetNickname()) {
                     NetworkServer.Destroy(doll.gameObject);
                 }
+            }
+            if(Map.IsNukeDetonated) {
+                if(player.GetCurrentRoom().Zone != EXILED.ApiObjects.ZoneType.Surface) player.Kill();
+                else foreach(Lift l in Map.Lifts) if(l.elevatorName.ToLower() == "gatea" || l.elevatorName.ToLower() == "gateb")
+                        foreach(Lift.Elevator e in l.elevators)
+                            if(e.target.name == "ElevatorChamber (1)") {
+                                if(Vector3.Distance(player.GetPosition(), e.target.position) <= 3.6f) player.Kill();
+                            }
             }
         }
     }

@@ -25,6 +25,7 @@ namespace TranquilizerGun {
         public int tranqDamage;
 
         public int ScpShotsNeeded;
+        public bool clearBroadcasts;
         public bool replaceComGun;
         public bool requiresPermission;
         public bool blacklist173;
@@ -98,6 +99,7 @@ namespace TranquilizerGun {
             noAmmoDuration = Config.GetUInt("tgun_noammo_duration", 2);
             noAmmoText = Config.GetString("tgun_noammo_text", "<color=red>You need %ammo ammo to fire your gun!</color>").Replace("%ammo", $"{tranqAmmo + 1}");
 
+            clearBroadcasts = Config.GetBool("tgun_clearbroadcasts", true);
             requiresPermission = Config.GetBool("tgun_usespermission", false);
             blacklist173 = Config.GetBool("tgun_blacklist_173", true);
             #endregion
