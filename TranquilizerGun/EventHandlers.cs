@@ -72,7 +72,7 @@ namespace TranquilizerGun {
                                     return;
                                 }
                             }
-                            ev.Sender.RAMessage("<color=red><b>WARNING, THIS COMMAND WILL UNDO WHATEVER CHANGES YOU DID TO THE CONFIGURATION SETTINGS, THIS CANNOT BE UNDONE.</b></color>");
+                            ev.Sender.RAMessage("<color=red><b>WARNING, THIS COMMAND WILL UNDO WHATEVER CHANGES YOU DID TO THE CONFIGURATION SETTINGS, THIS CANNOT BE UNDONE. (This will only undo this plugin's config settings, all the other ones will be fine)</b></color>");
                             password = Extensions.GeneratePassword().ToLower();
                             ev.Sender.RAMessage($"<color=red>Please type: \"tg defaultconfig {password}\" to confirm.</color>");
                             return;
@@ -180,7 +180,11 @@ namespace TranquilizerGun {
                                     ev.Sender.RAMessage($"<color=red>Couldn't find player: {args[2]}.</color>");
                                     return;
                                 }
-
+                                
+                                if(protection.Contains(player)) {
+                                    ev.Sender.RAMessage($"<color=red>Player has protection enabled.</color>");
+                                    return;
+                                }
                                 ev.Sender.RAMessage($"<color=green>Putting {player.GetNickname()} to sleep.</color>");
                                 GoSleepySleepy(player);
                             }

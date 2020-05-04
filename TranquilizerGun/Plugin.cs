@@ -67,6 +67,7 @@ namespace TranquilizerGun {
         }
 
         public override void OnReload() {
+            // It is important to add this line of text just to make people remember how literally no-one
         }
 
         public List<RoleType> BlacklistedRoles() {
