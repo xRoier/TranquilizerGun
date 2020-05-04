@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace TranquilizerGun {
     public static class Extensions {
         public static void RAMessage( this CommandSender sender, string message, bool success = true ) =>
@@ -23,9 +27,19 @@ namespace TranquilizerGun {
             || ItemType.GunMP7 == type || ItemType.GunProject90 == type || ItemType.GunUSP == type
             || ItemType.MicroHID == type);
 
+        public static string GeneratePassword() {
+            return new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 5)
+              .Select(s => s[new Random().Next(s.Length)]).ToArray());
+        }
+
         public static float GenerateRandomNumber( float min, float max ) {
-            if(max + 1 <= min) return min;
-            return (float) new System.Random().NextDouble() * ((max + 1) - min) + min;
+            if(max <= min) return min;
+            return UnityEngine.Random.Range(min, max + 1);
+        }
+
+        public static int GenerateRandomNumber( int min, int max ) {
+            if(max <= min) return min;
+            return UnityEngine.Random.Range(min, max + 1);
         }
     }
 }

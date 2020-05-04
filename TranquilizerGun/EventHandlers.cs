@@ -1,19 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using EXILED;
 using EXILED.Extensions;
-using GameCore;
-using Grenades;
 using MEC;
 using Mirror;
-using RemoteAdmin;
 using UnityEngine;
 using static DamageTypes;
 using Log = EXILED.Log;
 using Object = UnityEngine.Object;
-using Harmony;
 
 namespace TranquilizerGun {
     public class EventHandlers {
@@ -23,8 +18,9 @@ namespace TranquilizerGun {
         public int gunCd = 10;
         public ItemType tgun;
         public Dictionary<ReferenceHub, int> scpShots;
-        public List<ReferenceHub> tranquilized, protection, pepega;
+        public static List<ReferenceHub> tranquilized, protection, pepega;
         public readonly EXILED.ApiObjects.AmmoType _9mm = EXILED.ApiObjects.AmmoType.Dropped9;
+        public string password = "getagirlfriend";
 
         public EventHandlers( Plugin plugin ) {
             this.plugin = plugin;
@@ -62,7 +58,27 @@ namespace TranquilizerGun {
                         return;
                     }
                     if(args.Length >= 2) {
-                        if(args[1] == "protect") {
+                            #region Default config
+                        if(args[1] == "defaultconfig") {
+                            if(!CheckPermission(sender, "defaultconfig")) {
+                                ev.Sender.RAMessage(plugin.accessDenied);
+                                return;
+                            }
+                            if(args.Length >= 3) {
+                                if(args[2] == password) {
+                                    ev.Sender.RAMessage("<color=green>Setting up configuration...</color>");
+                                    plugin.SetupConfig();
+                                    ev.Sender.RAMessage("<color=green>Configuration settings changed to their default values!</color>");
+                                    return;
+                                }
+                            }
+                            ev.Sender.RAMessage("<color=red><b>WARNING, THIS COMMAND WILL UNDO WHATEVER CHANGES YOU DID TO THE CONFIGURATION SETTINGS, THIS CANNOT BE UNDONE.</b></color>");
+                            password = Extensions.GeneratePassword().ToLower();
+                            ev.Sender.RAMessage($"<color=red>Please type: \"tg defaultconfig {password}\" to confirm.</color>");
+                            return;
+                            #endregion
+                            #region Protect
+                        } else if(args[1] == "protect") {
                             if(!CheckPermission(sender, "protect")) {
                                 ev.Sender.RAMessage(plugin.accessDenied);
                                 return;
@@ -75,6 +91,8 @@ namespace TranquilizerGun {
                                 ev.Sender.RAMessage($"<color=green>You've gained protection against tranquilizers!</color>");
                             }
                             return;
+                            #endregion
+                            #region Toggle
                         } else if(args[1] == "toggle") {
                             if(!CheckPermission(sender, "toggle")) {
                                 ev.Sender.RAMessage(plugin.accessDenied);
@@ -86,6 +104,8 @@ namespace TranquilizerGun {
                             if(plugin.enabled) plugin.StartEvents();
                             else if(!plugin.enabled) plugin.StopEvents();
                             return;
+                            #endregion
+                            #region Replace guns
                         } else if(args[1] == "replaceguns") {
                             if(!CheckPermission(sender, "replaceguns")) {
                                 ev.Sender.RAMessage(plugin.accessDenied);
@@ -94,6 +114,8 @@ namespace TranquilizerGun {
                             Timing.RunCoroutine(DelayedReplace());
                             ev.Sender.RAMessage($"<color=green>Replaced all COM15 pistols with {tgun.ToString()}.</color>");
                             return;
+                            #endregion
+                            #region Add gun
                         } else if(args[1] == "addgun" ) {
                             if(!CheckPermission(sender, "addgun")) {
                                 ev.Sender.RAMessage(plugin.accessDenied);
@@ -102,6 +124,8 @@ namespace TranquilizerGun {
                             sender.AddItem(tgun);
                             ev.Sender.RAMessage($"<color=green>You received a tranquilizing gun!</color>");
                             return;
+                            #endregion
+                            #region Set gun
                         } else if(args[1] == "setgun") {
                             if(!CheckPermission(sender, "setgun")) {
                                 ev.Sender.RAMessage(plugin.accessDenied);
@@ -116,6 +140,8 @@ namespace TranquilizerGun {
                             tgun = newGun;
                             ev.Sender.RAMessage($"<color=green>Tranquilizer gun has been set to: {newGun.ToString()}.</color>");
                             return;
+                            #endregion
+                            #region Reload
                         } else if(args[1] == "reload") {
                             if(!CheckPermission(sender, "reload")) {
                                 ev.Sender.RAMessage(plugin.accessDenied);
@@ -124,6 +150,8 @@ namespace TranquilizerGun {
                             plugin.ReloadConfig();
                             ev.Sender.RAMessage($"<color=green>Configuration variables have been reloaded.</color>");
                             return;
+                            #endregion
+                            #region Sleep
                         } else if(args[1] == "sleep") {
                             if(!CheckPermission(sender, "sleep")) {
                                 ev.Sender.RAMessage(plugin.accessDenied);
@@ -157,13 +185,16 @@ namespace TranquilizerGun {
                                 GoSleepySleepy(player);
                             }
                             return;
+                            #endregion
+                            #region Version
                         } else if(args[1] == "version") {
                             ev.Sender.RAMessage("You're currently using " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Name);
                             return;
                         }
+                        #endregion
                     }
                     ev.Sender.RAMessage($"<color=red>Try using: \"{args[0]} <argument>\"</color>" +
-                        $"\n<color=red>Possible arguments: reload / protect / replaceguns / toggle / sleep / version / setgun / addgun</color>");
+                        $"\n<color=red>Possible arguments: reload / protect / replaceguns / toggle / sleep / version / setgun / addgun / defaultconfig</color>");
                 }
             } catch(Exception e) {
                 Log.Error("" + e.StackTrace);
@@ -184,7 +215,6 @@ namespace TranquilizerGun {
         }
 
         public void OnShootEvent( ref ShootEvent ev ) {
-            ReferenceHub hub = ev.Shooter;
             if((plugin.requiresPermission && !ev.Shooter.CheckPermission("use"))) return;
             if(ev.Shooter.inventory.NetworkcurItem == tgun) {
                 if(ev.Shooter.inventory.GetItemInHand().durability < plugin.tranqAmmo) {
@@ -192,9 +222,6 @@ namespace TranquilizerGun {
                         if(plugin.clearBroadcasts) ev.Shooter.ClearBroadcasts();
                         ev.Shooter.Broadcast(plugin.noAmmoDuration, plugin.noAmmoText);
                     }
-                    int savedAmmo = (int) ev.Shooter.inventory.GetItemInHand().durability;
-                    ev.Shooter.SetWeaponAmmo(0);
-                    Timing.CallDelayed(0.2f, () => { hub.SetWeaponAmmo(savedAmmo); });
                     ev.Allow = false;
                     return;
                 }
@@ -203,14 +230,14 @@ namespace TranquilizerGun {
         }
 
         public void OnPlayerHurt( ref PlayerHurtEvent ev ) {
-            if(tranquilized.Contains(ev.Player) && ev.DamageType == DamageTypes.Decont) { 
+            if(tranquilized.Contains(ev.Player) && (ev.DamageType == DamageTypes.Decont || ev.DamageType == DamageTypes.Nuke)) { 
                 ev.Amount = 0;
                 return;
             }
 
             if(IsThisFrustrating(ev.DamageType) && ThisIsMoreFrustrating(ev.DamageType) == tgun && !protection.Contains(ev.Player) && ev.Player != ev.Attacker) {
                 ev.Amount = plugin.tranqDamage;
-                if(ev.Player.characterClassManager.CurClass == RoleType.Scp173 && plugin.blacklist173) return; 
+                if(plugin.blacklist.Contains(ev.Player.GetRole())) return;
                 if(ev.Player.GetTeam() == Team.SCP && plugin.ScpShotsNeeded > 1) {
                     if(!scpShots.ContainsKey(ev.Player)) scpShots.Add(ev.Player, 0);
                     scpShots[ev.Player] += 1;
@@ -224,7 +251,7 @@ namespace TranquilizerGun {
             }
         }
 
-        private void GoSleepySleepy( ReferenceHub player ) {
+        public void GoSleepySleepy( ReferenceHub player ) {
             int IdkHowToCode = (int) player.characterClassManager.CurClass;
             Vector3 UglyCopy = player.GetPosition();
             List<Inventory.SyncItemInfo> items = player.inventory.items.ToList();
@@ -241,13 +268,14 @@ namespace TranquilizerGun {
             tranquilized.Add(player);
             player.ClearInventory();
             EventPlugin.GhostedIds.Add(player.queryProcessor.PlayerId);
-            //if(!plugin.doStun) player.SetPosition(2, -2, 3);
-            if(!plugin.doStun) player.SetPosition(Vector3.up * 9999f);
+            if(!plugin.doStun) player.SetPosition(2, -2, 3);
             //else {
             // 10.0 update stun
             //}
-            Timing.RunCoroutine(WakeTheFuckUpSamurai(player, items, UglyCopy, Extensions.GenerateRandomNumber(plugin.sleepDurationMin, plugin.sleepDurationMax)));
+
+            Timing.CallDelayed(Extensions.GenerateRandomNumber(plugin.sleepDurationMin, plugin.sleepDurationMax), () => WakeTheFuckUpSamurai(player, items, UglyCopy) );
         }
+
         public bool IsThisFrustrating( DamageType type ) {
             return ((type == DamageTypes.Usp && tgun == ItemType.GunUSP) ||
                 (type == DamageTypes.Com15 && tgun == ItemType.GunCOM15) ||
@@ -268,11 +296,11 @@ namespace TranquilizerGun {
             else if(type == DamageTypes.P90) return ItemType.GunProject90;
             return ItemType.GunUSP;
         }
-
+        // 30 < 75
         public IEnumerator<float> DelayedReplace() {
             yield return Timing.WaitForSeconds(2);
             foreach(Pickup item in Object.FindObjectsOfType<Pickup>()) {
-                if(item.ItemId == ItemType.GunCOM15) {
+                if(item.ItemId == ItemType.GunCOM15 && UnityEngine.Random.Range(1, 100) <= plugin.replaceChance) {
                     item.ItemId = tgun;
                     item.RefreshDurability(true, true);
                 }
@@ -284,8 +312,7 @@ namespace TranquilizerGun {
             return true;
         }
 
-        public IEnumerator<float> WakeTheFuckUpSamurai( ReferenceHub player, List<Inventory.SyncItemInfo> items, Vector3 pos, float time ) {
-            yield return Timing.WaitForSeconds(time);
+        public static void WakeTheFuckUpSamurai( ReferenceHub player, List<Inventory.SyncItemInfo> items, Vector3 pos) {
             player.plyMovementSync.OverridePosition(pos, 0f, false);
             tranquilized.Remove(player);
             player.SetInventory(items);
@@ -299,9 +326,8 @@ namespace TranquilizerGun {
                 if(player.GetCurrentRoom().Zone != EXILED.ApiObjects.ZoneType.Surface) player.Kill();
                 else foreach(Lift l in Map.Lifts) if(l.elevatorName.ToLower() == "gatea" || l.elevatorName.ToLower() == "gateb")
                         foreach(Lift.Elevator e in l.elevators)
-                            if(e.target.name == "ElevatorChamber (1)") {
+                            if(e.target.name == "ElevatorChamber (1)")
                                 if(Vector3.Distance(player.GetPosition(), e.target.position) <= 3.6f) player.Kill();
-                            }
             }
         }
     }
