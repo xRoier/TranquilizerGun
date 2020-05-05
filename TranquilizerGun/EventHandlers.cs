@@ -251,6 +251,9 @@ namespace TranquilizerGun {
                     }
                     return;
                 }
+                if(!plugin.friendlyFire && (ev.Player.GetTeam() == ev.Attacker.GetTeam()
+                    || (ev.Player.GetTeam() == Team.CHI && ev.Player.GetTeam() == Team.CDP)
+                    || (ev.Player.GetTeam() == Team.MTF && ev.Player.GetTeam() == Team.RSC))) return;
                 GoSleepySleepy(ev.Player);
             }
         }

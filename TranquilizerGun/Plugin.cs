@@ -32,6 +32,7 @@ namespace TranquilizerGun {
         public int replaceChance;
         public bool requiresPermission;
         public bool doStun;
+        public bool friendlyFire;
 
         //I'm too lazy to make a List please forgive me. I'm actually depressed and this is my cry for help.
         public bool doBlacklist;
@@ -121,6 +122,7 @@ namespace TranquilizerGun {
                    
             Config.SetString("tgun_clearbroadcasts", "true");
             Config.SetString("tgun_usespermission", "false");
+            Config.SetString("tgun_friendlyfire", "true");
 
             Config.SetString("tgun_scp_shotsneeded", "2");
             Config.SetString("tgun_blacklist_toggle", "false");
@@ -155,6 +157,7 @@ namespace TranquilizerGun {
             requiresPermission = Config.GetBool("tgun_usespermission", false);
             doBlacklist = Config.GetBool("tgun_blacklist_toggle", false);
             blacklist = BlacklistedRoles();
+            friendlyFire = Config.GetBool("tgun_friendlyfire", true);
 
             #endregion
         }
