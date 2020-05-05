@@ -1,7 +1,8 @@
 tgun_enable: True
 tgun_weapon: GunUSP
 
-tgun_blacklist_173: true
+tgun_blacklist_toggle: false
+tgun_blacklist: Scp173, Scp106
 tgun_scp_shotsneeded: 2
 
 tgun_ammo: 18
@@ -10,6 +11,7 @@ tgun_sleepduration_min: 3.0
 tgun_sleepduration_max: 5.0
 #tgun_stun (Feature coming on the next SCP:SL update)
 tgun_replacecomgun: true
+tgun_replacechance: 100
 tgun_accessdenied: <color=red>Access denied.</color>
 
 tgun_warning_duration: 3
