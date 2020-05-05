@@ -50,6 +50,7 @@ These are the variables that should be added to your 7777-config.yml. Or simply 
 | tgun_noammo_duration | Duration of message displayed when whoever holds the tgun is out of ammo **(Use 0 to disable)** | `1` |
 | tgun_noammo_text | Message displayed when whoever holds the tgun is out of ammo  | `<color=red>You need %ammo ammo to fire your gun!</color>` |
 | tgun_clearbroadcasts | Whether or not to clear previous broadcasts when displaying one (This will avoid making some texts last a lot) | `true` |
+| tgun_friendlyfire | Are players able to sleep their teammates? | `true` |
 
 ### Permissions
 These are the permissions that should be added to your permissions.yml inside your "%appdata%/Roaming/Plugins/Exiled Permissions" folder.
