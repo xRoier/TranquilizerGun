@@ -24,3 +24,4 @@ tgun_noammo_duration: 2
 tgun_noammo_text: <color=red>You need %ammo ammo to fire your gun!</color>
 
 tgun_clearbroadcasts: true
+tgun_friendlyfire: true
