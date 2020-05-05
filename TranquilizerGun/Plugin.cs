@@ -103,7 +103,6 @@ namespace TranquilizerGun {
 
         public void SetupConfig() {
             Config.SetString("tgun_weapon", "GunUSP");
-            Config.SetString("tgun_scp_shotsneeded", "2");
             Config.SetString("tgun_ammo", "9");
             Config.SetString("tgun_damage", "1");
             Config.SetString("tgun_sleepduration_min", "3");
@@ -122,9 +121,12 @@ namespace TranquilizerGun {
                    
             Config.SetString("tgun_clearbroadcasts", "true");
             Config.SetString("tgun_usespermission", "false");
+
+            Config.SetString("tgun_scp_shotsneeded", "2");
             Config.SetString("tgun_blacklist_toggle", "false");
             Config.SetString("tgun_blacklist", "Scp173, Scp106");
 
+            ReloadConfig();
         }
 
         public void ReloadConfig() {
