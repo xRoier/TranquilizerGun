@@ -323,12 +323,23 @@ namespace TranquilizerGun {
             player.plyMovementSync.OverridePosition(pos, 0f, false);
             tranquilized.Remove(player);
             player.SetInventory(items);
+            CustomPlayerEffects.SinkHole ef = player.effectsController.GetEffect<CustomPlayerEffects.SinkHole>("SinkHole");
+            ef.Enabled = false;
+            ef.ServerDisable();
             EventPlugin.GhostedIds.Remove(player.queryProcessor.PlayerId);
             foreach(Ragdoll doll in Object.FindObjectsOfType<Ragdoll>()) {
                 if(doll.owner.ownerHLAPI_id == player.GetNickname()) {
                     NetworkServer.Destroy(doll.gameObject);
                 }
             }
+
+            if( player.GetCurrentRoom()?.Name == "PocketWorld" ) {
+                CustomPlayerEffects.Corroding pDEf = player.effectsController.GetEffect<CustomPlayerEffects.Corroding>("Corroding");
+                pDEf.isInPd = true;
+                pDEf.Enabled = true;
+                pDEf.ServerEnable();
+            }
+
             if(Map.IsNukeDetonated) {
                 if(player.GetCurrentRoom().Zone != EXILED.ApiObjects.ZoneType.Surface) player.Kill();
                 else foreach(Lift l in Map.Lifts) if(l.elevatorName.ToLower() == "gatea" || l.elevatorName.ToLower() == "gateb")

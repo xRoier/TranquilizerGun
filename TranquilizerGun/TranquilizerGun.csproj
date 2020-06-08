@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Tranq</RootNamespace>
-    <AssemblyName>TranquilizerGun 1.7.7</AssemblyName>
+    <AssemblyName>TranquilizerGun 1.7.15</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -36,28 +36,26 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Desktop\2017\Servidores\SCP\_ExiledIgnire\0Harmony.dll</HintPath>
     </Reference>
-    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Desktop\2017\Servidores\SCP\_ExiledIgnire\Assembly-CSharp.dll</HintPath>
-    </Reference>
     <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\..\..\..\Desktop\2017\Servidores\SCP\SCPSL_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
-    <Reference Include="EXILED, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Desktop\2017\Servidores\SCP\_ExiledIgnire\EXILED\EXILED.dll</HintPath>
+    <Reference Include="Assembly-CSharp-Publicized">
+      <HintPath>..\..\..\..\References\Assembly-CSharp-Publicized.dll</HintPath>
     </Reference>
-    <Reference Include="EXILED_Events, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Desktop\2017\Servidores\SCP\_ExiledIgnire\Plugins\EXILED_Events.dll</HintPath>
+    <Reference Include="Exiled.API">
+      <HintPath>..\..\..\..\References\EXILED-PTB\Exiled.API.dll</HintPath>
     </Reference>
-    <Reference Include="EXILED_Idler, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Desktop\2017\Servidores\SCP\_ExiledIgnire\Plugins\EXILED_Idler.dll</HintPath>
+    <Reference Include="Exiled.Events">
+      <HintPath>..\..\..\..\References\EXILED-PTB\Plugins\Exiled.Events.dll</HintPath>
     </Reference>
-    <Reference Include="EXILED_Permissions, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Desktop\2017\Servidores\SCP\_ExiledIgnire\Plugins\EXILED_Permissions.dll</HintPath>
+    <Reference Include="Exiled.Loader">
+      <HintPath>..\..\..\..\References\EXILED-PTB\Exiled.Loader.dll</HintPath>
+    </Reference>
+    <Reference Include="Exiled.Permissions">
+      <HintPath>..\..\..\..\References\EXILED-PTB\Plugins\Exiled.Permissions.dll</HintPath>
+    </Reference>
+    <Reference Include="Exiled.Updater">
+      <HintPath>..\..\..\..\References\EXILED-PTB\Plugins\Exiled.Updater.dll</HintPath>
     </Reference>
     <Reference Include="Mirror, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\..\..\..\Desktop\2017\Servidores\SCP\SCPSL_Data\Managed\Mirror.dll</HintPath>
