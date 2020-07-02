@@ -1,38 +1,43 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Exiled.API.Features;
 
 namespace TranquilizerGun {
     public static class Extensions {
-		// uniq = unique id - modBarrel == 1 = silencer
-		public static bool HasSilencer(this ReferenceHub hub) {
-			try {
-				if(hub.inventory == null || hub.weaponManager == null || hub.weaponManager.curWeapon < 0 ||
-					hub.weaponManager.curWeapon >= hub.weaponManager.weapons.Length || !hub.inventory.GetItemInHand().id.IsPistol())
-					return false;
-				else if(hub.inventory.GetItemInHand().modBarrel == 1)
-					return true;
-			} catch(Exception e) {
-				e.Print("HasSilencer");
-			}	
-			return false;
-		}
+        public static void RAMessage( this CommandSender sender, string message, bool success = true ) =>
+            sender.RaReply("<color=green>TranquilizerGun</color>#" + message, success, true, string.Empty);
 
-		public static bool IsPistol(this ItemType type) => type == ItemType.GunCOM15 || type == ItemType.GunUSP;
 
-		public static void Print(this Exception e, string type) {
-            Log.Error($"{type}: {e.Message}\n{e.StackTrace}");
+        public static void RemoveWeaponAmmo( this ReferenceHub rh, int amount ) {
+            rh.inventory.items.ModifyDuration(
+            rh.inventory.items.IndexOf(rh.inventory.GetItemInHand()),
+            rh.inventory.GetItemInHand().durability - amount);
         }
 
-		public static Inventory.SyncItemInfo GetTranquilizerItem() {
-			Inventory.SyncItemInfo _tempGun = new Inventory.SyncItemInfo();
-			_tempGun.modBarrel = 1;
+        public static void SetWeaponAmmo( this ReferenceHub rh, int amount ) {
+            rh.inventory.items.ModifyDuration(
+            rh.inventory.items.IndexOf(rh.inventory.GetItemInHand()),
+            amount);
+        }
 
-			return _tempGun;
-		}
+        public static bool IsWeapon( this ItemType type ) =>
+            (ItemType.GunCOM15 == type || ItemType.GunE11SR == type || ItemType.GunLogicer == type
+            || ItemType.GunMP7 == type || ItemType.GunProject90 == type || ItemType.GunUSP == type
+            || ItemType.MicroHID == type);
 
+        public static string GeneratePassword() {
+            return new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 5)
+              .Select(s => s[new Random().Next(s.Length)]).ToArray());
+        }
+
+        public static float GenerateRandomNumber( float min, float max ) {
+            if(max <= min) return min;
+            return UnityEngine.Random.Range(min, max + 1);
+        }
+
+        public static int GenerateRandomNumber( int min, int max ) {
+            if(max <= min) return min;
+            return UnityEngine.Random.Range(min, max + 1);
+        }
     }
 }
